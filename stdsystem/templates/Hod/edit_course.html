@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row">
+    <div class="col-sm-12">
+        <div class="card">
+            <div class="card-body">
+                <form action="{% url 'update_course' %}" method="post">
+                    {% csrf_token %}
+                    {% include 'includes/messages.html' %}
+                    <div>
+                        <div class="col-12">
+                            <h5 class="form-title"><span>Edit Course</span></h5>
+                        </div>
+                        <div class="col-12 col-sm-11">
+                            <div class="form-group">
+                                <label>Course Name</label>
+                                <input class="form-control" name="name" required type="text" value="{{course.name}}">
+                                <input class="form-control" name="course_id" required type="text" hidden value="{{course.id}}">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-primary" type="submit">Update Course</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

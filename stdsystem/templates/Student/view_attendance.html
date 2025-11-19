@@ -1,0 +1,231 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="content container-fluid">
+    <div class="page-header">
+      <div class="row align-items-center">
+        <div class="col">
+          <h3 class="page-title">Take Attendance</h3>
+          <ul class="breadcrumb">
+            <li class="breadcrumb-item">Dashboard</li>
+            <li class="breadcrumb-item active">Attendance</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    {% include 'includes/messages.html' %}
+
+    {% if action is None %}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="card">
+            <div class="card-body">
+              <form id="attendanceForm" action="?action=view_attendance" method="post" class="needs-validation" novalidate>
+                {% csrf_token %}
+                <div class="row">
+                  <div class="col-12">
+                    <h5 class="form-title"><span>View Attendance</span></h5>
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                      <label>Subject <span class="text-danger">*</span></label>
+                      <select class="form-control" name="subject_id" id="subject_id" required>
+                        <option value="">Select Subject</option>
+                        {% for i in subject %}
+                          <option value="{{ i.id }}">{{ i.name }}</option>
+                        {% endfor %}
+                      </select>
+                      <div class="invalid-feedback">Please select a subject.</div>
+                    </div>
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                      <label>Session Year <span class="text-danger">*</span></label>
+                      <select class="form-control" name="session_year_id" id="session_year_id" required>
+                        <option value="">Select Session Year</option>
+                        {% for i in session_year %}
+                          <option value="{{ i.id }}">{{ i.session_start }} to {{ i.session_end }}</option>
+                        {% endfor %}
+                      </select>
+                      <div class="invalid-feedback">Please select a session year.</div>
+                    </div>
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                      <label>Attendance Date <span class="text-danger">*</span></label>
+                      <input type="date" name="attendance_date" id="attendance_date" class="form-control" required />
+                      <div class="invalid-feedback">Please select an attendance date.</div>
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <button type="submit" class="btn btn-primary">Fetch Attendance</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="row">
+        <div class="col-sm-12">
+          <div class="card">
+            <div class="card-body">
+              <form action="?action=view_attendance" method="post">
+                {% csrf_token %}
+                <div class="row">
+                  <div class="col-12">
+                    <h5 class="form-title"><span>View Attendance</span></h5>
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                      <label>Subject</label>
+                      <select class="form-control" name="subject_id" disabled>
+                        <option value="{{ i.id }}">{{ get_subject }}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                      <label>Session Year</label>
+                      <select class="form-control" name="session_year_id" disabled>
+                        <option value="{{ i.id }}">{{ get_session_year }}</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-12 col-sm-6">
+                    <div class="form-group">
+                      <label>Attendance Date</label>
+                      <input type="date" name="attendance_date" value="{{ attendance_date }}" class="form-control" disabled />
+                    </div>
+                  </div>
+                  <div class="col-12">
+                    <div class="row">
+                      <div class="col-sm-12">
+                        <div class="card card-table">
+                          <div class="card-body">
+                            <div class="table-responsive">
+                              <table id="table_id" class="table table-hover table-center mb-0">
+                                <thead>
+                                  <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {% for i in attendance_report %}
+                                    <tr>
+                                      <td>{{ i.student_id.admin.id }}</td>
+                                      <td>{{ i.student_id.admin.first_name }} {{ i.student_id.admin.last_name }}</td>
+                                      <td>{{ i.student_id.admin.email }}</td>
+                                    </tr>
+                                  {% endfor %}
+                                </tbody>
+                              </table>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  <script>
+    // Form validation script
+    ;(function () {
+      'use strict'
+    
+      // Fetch the form
+      var form = document.getElementById('attendanceForm')
+    
+      if (form) {
+        // Add submit event listener
+        form.addEventListener(
+          'submit',
+          function (event) {
+            // Get form fields
+            var subjectId = document.getElementById('subject_id')
+            var sessionYearId = document.getElementById('session_year_id')
+            var attendanceDate = document.getElementById('attendance_date')
+    
+            var isValid = true
+    
+            // Validate subject
+            if (!subjectId.value || subjectId.value === '') {
+              subjectId.setCustomValidity('Please select a subject.')
+              isValid = false
+            } else {
+              subjectId.setCustomValidity('')
+            }
+    
+            // Validate session year
+            if (!sessionYearId.value || sessionYearId.value === '') {
+              sessionYearId.setCustomValidity('Please select a session year.')
+              isValid = false
+            } else {
+              sessionYearId.setCustomValidity('')
+            }
+    
+            // Validate attendance date
+            if (!attendanceDate.value || attendanceDate.value === '') {
+              attendanceDate.setCustomValidity('Please select an attendance date.')
+              isValid = false
+            } else {
+              attendanceDate.setCustomValidity('')
+            }
+    
+            // Check form validity
+            if (!form.checkValidity() || !isValid) {
+              event.preventDefault()
+              event.stopPropagation()
+            }
+    
+            // Add validation class
+            form.classList.add('was-validated')
+          },
+          false
+        )
+      }
+    })()
+  </script>
+
+  <style>
+    .invalid-feedback {
+      display: none;
+      width: 100%;
+      margin-top: 0.25rem;
+      font-size: 0.875em;
+      color: #dc3545;
+    }
+    
+    .was-validated .form-control:invalid ~ .invalid-feedback,
+    .was-validated .form-control:invalid {
+      display: block;
+    }
+    
+    .was-validated .form-control:invalid {
+      border-color: #dc3545;
+      padding-right: calc(1.5em + 0.75rem);
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right calc(0.375em + 0.1875rem) center;
+      background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+    }
+    
+    .was-validated .form-control:valid {
+      border-color: #28a745;
+    }
+    
+    .text-danger {
+      color: #dc3545 !important;
+    }
+  </style>
+{% endblock %}
